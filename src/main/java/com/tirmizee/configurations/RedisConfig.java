@@ -1,5 +1,6 @@
 package com.tirmizee.configurations;
 
+import com.tirmizee.models.User;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,13 +32,27 @@ public class RedisConfig {
         return new ReactiveRedisTemplate<>(factory, context);
     }
 
-    @Bean(value = "redisOperations2")
-    public ReactiveRedisOperations<String, Object> redisOperations2(ReactiveRedisConnectionFactory factory) {
+    @Bean(value = "userOperations")
+    public ReactiveRedisOperations<String, User> userOperations(ReactiveRedisConnectionFactory factory) {
         StringRedisSerializer keySerializer = new StringRedisSerializer();
-        Jackson2JsonRedisSerializer<Object> valueSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        RedisSerializationContext.RedisSerializationContextBuilder<String, Object> builder =
-                RedisSerializationContext.newSerializationContext(keySerializer);
-        RedisSerializationContext<String, Object> context = builder.value(valueSerializer).build();
+        Jackson2JsonRedisSerializer<User> valueSerializer = new Jackson2JsonRedisSerializer<>(User.class);
+
+        RedisSerializationContext.RedisSerializationContextBuilder<String, User> builder = RedisSerializationContext.newSerializationContext();
+        RedisSerializationContext<String, User> context = builder
+                .key(keySerializer)
+                .hashKey(keySerializer)
+                .value(valueSerializer)
+                .hashValue(valueSerializer)
+                .build();
+        return new ReactiveRedisTemplate<>(factory, context);
+    }
+
+    @Bean(value = "stringOperations")
+    public ReactiveRedisOperations<String, String> stringOperations(ReactiveRedisConnectionFactory factory) {
+        StringRedisSerializer serializer = new StringRedisSerializer();
+        RedisSerializationContext.RedisSerializationContextBuilder<String, String> builder =
+                RedisSerializationContext.newSerializationContext(serializer);
+        RedisSerializationContext<String, String> context = builder.value(serializer).build();
         return new ReactiveRedisTemplate<>(factory, context);
     }
 
